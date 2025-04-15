@@ -20,6 +20,8 @@ public class AlertMapper {
         AlertDTO alertDTO = new AlertDTO();
         alertDTO.setId(alert.getId());
         alertDTO.setProductId(alert.getProduct().getId());
+        alertDTO.setProductName(alert.getProduct().getName());
+        alertDTO.setProductSku(alert.getProduct().getSku());
         alertDTO.setResolved(alert.isResolved());
         alertDTO.setCreatedDate(alert.getCreatedDate());
         alertDTO.setUpdatedDate(alert.getUpdatedDate());

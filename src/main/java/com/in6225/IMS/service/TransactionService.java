@@ -18,6 +18,11 @@ public interface TransactionService {
     // Method to get all transactions
     List<TransactionDTO> getAllTransactions();
 
+    // Method to get all transactions by product ID
+    List<TransactionDTO> getAllTransactionsByProductId(Long productId);
+
+    List<TransactionDTO> getTodaysTransactions();
+
     // Method to delete a transaction by its ID
     void deleteTransaction(Long transactionId);
 }

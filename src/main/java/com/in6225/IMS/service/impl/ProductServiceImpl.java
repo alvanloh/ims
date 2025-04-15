@@ -48,7 +48,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDTO> getAllProducts() {
-        List<Product> products = productRepository.findAll();
+        List<Product> products = productRepository.findAllByOrderByIdDesc();
         return productMapper.toProductDTOList(products);
     }
 
@@ -56,5 +56,10 @@ public class ProductServiceImpl implements ProductService {
     public void deleteProduct(Long productId) {
         Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
         productRepository.delete(product);
+    }
+
+    public List<ProductDTO> getLowStockProducts() {
+        List<Product> products = productRepository.LowStockProducts();
+        return productMapper.toProductDTOList(products);
     }
 }

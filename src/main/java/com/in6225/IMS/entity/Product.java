@@ -3,6 +3,7 @@ package com.in6225.IMS.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,6 +22,7 @@ public class Product extends BaseEntity { // Assuming BaseEntity has @MappedSupe
     private String name;
 
     @Column(nullable = false)
+    @Min(value = 0, message = "Quantity cannot be negative")
     private int quantity;
 
     @Column(nullable = false)

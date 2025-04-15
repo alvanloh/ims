@@ -11,6 +11,9 @@ import com.in6225.IMS.repository.TransactionRepository;
 import com.in6225.IMS.service.TransactionService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -46,6 +49,10 @@ public class TransactionServiceImpl implements TransactionService {
 
         // Get the updated quantity after the update operation
         int updatedQuantity = product.getQuantity();
+
+        if (updatedQuantity < 0 && transactionDTO.getTransactionType().equals("OUT")) {
+            throw new RuntimeException("Transaction would result in negative product quantity");
+        }
 
         // Check if we need to create a reorder alert
         if (currentQuantity > product.getReorder() && updatedQuantity < product.getReorder()) {
@@ -87,10 +94,20 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public TransactionDTO updateTransaction(Long transactionId, TransactionDTO transactionDTO) {
-        Transaction existingTransaction = transactionRepository.findById(transactionId).orElseThrow(() -> new RuntimeException("Transaction not found"));
+        Transaction existingTransaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+        
+        // Find product by SKU if it's provided in the DTO
+        if (transactionDTO.getProductSku() != null) {
+            Product product = productRepository.findBySku(transactionDTO.getProductSku())
+                    .orElseThrow(() -> new RuntimeException("Product not found with SKU: " + transactionDTO.getProductSku()));
+            existingTransaction.setProduct(product);
+        }
+
         existingTransaction.setQuantity(transactionDTO.getQuantity());
         existingTransaction.setTransactionType(Transaction.TransactionType.valueOf(transactionDTO.getTransactionType()));
         existingTransaction.setReference(transactionDTO.getReference());
+        
         existingTransaction = transactionRepository.save(existingTransaction);
         return transactionMapper.toTransactionDTO(existingTransaction);
     }
@@ -103,12 +120,25 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public List<TransactionDTO> getAllTransactions() {
-        List<Transaction> transactions = transactionRepository.findAll();
+        List<Transaction> transactions = transactionRepository.findAllByOrderByIdDesc();
         return transactionMapper.toTransactionDTOList(transactions);
     }
 
     @Override
-    public void deleteTransaction(Long transactionId) {
+    public List<TransactionDTO> getAllTransactionsByProductId(Long productId) {
+        List<Transaction> transactions = transactionRepository.findAllByProductIdOrderByIdDesc(productId);
+        return transactionMapper.toTransactionDTOList(transactions);
+    }
+
+    public List<TransactionDTO> getTodaysTransactions() {
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
+        List<Transaction> transactions = transactionRepository.findTodaysTransactions(startOfDay, endOfDay);
+        return transactionMapper.toTransactionDTOList(transactions);
+    }
+
+    @Override
+    public void deleteTransaction (Long transactionId) {
         Transaction transaction = transactionRepository.findById(transactionId).orElseThrow(() -> new RuntimeException("Transaction not found"));
         transactionRepository.delete(transaction);
     }

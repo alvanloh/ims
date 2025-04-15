@@ -20,4 +20,6 @@ public interface ProductService {
 
     // Method to delete a product by its ID
     void deleteProduct(Long productId);
+
+    List<ProductDTO> getLowStockProducts();
 }
