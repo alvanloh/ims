@@ -15,5 +15,5 @@ public class User extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String username;
     private String password;
-    private String role; // e.g., "ADMIN", "USER", etc.
+    private String role; // e.g., "ADMIN", "MANAGER"
 }

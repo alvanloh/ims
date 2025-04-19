@@ -3,6 +3,8 @@ package com.in6225.IMS.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.Data;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Data
 @MappedSuperclass
@@ -42,8 +44,10 @@ public class BaseEntity {
 
     // Method to get the current authenticated user (for example using Spring Security)
     private String getCurrentUser() {
-        // Replace with your actual logic to fetch the authenticated user
-        // This could be something like SecurityContextHolder.getContext().getAuthentication().getName() in Spring Security
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            return authentication.getName(); // This returns the username
+        }
         return "system";  // Placeholder, replace with real logic
     }
 }

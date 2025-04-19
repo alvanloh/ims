@@ -27,11 +27,20 @@ public class AlertServiceImpl implements AlertService {
 
     @Override
     public AlertDTO createAlert(AlertDTO alertDTO) {
-        // Retrieve the product
-        Product product = productRepository.findById(alertDTO.getProductId())
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+        // 1. Retrieve the product (parent entity)
+        Product product = productRepository.findBySku(alertDTO.getProductSku())
+                .orElseThrow(() -> new RuntimeException("Product not found with SKU: " + alertDTO.getProductSku())); // Improved error message
+
+        // 2. Map the DTO to the Alert entity (child entity)
         Alert alert = alertMapper.toAlertEntity(alertDTO);
+
+        // 3. Explicitly associate the fetched Product with the Alert entity
+        alert.setProduct(product);
+
+        // 4. Save the Alert entity (Hibernate will now use product.getId() for the foreign key)
         alert = alertRepository.save(alert);
+
+        // 5. Map the saved entity back to a DTO
         return alertMapper.toAlertDTO(alert);
     }
 

@@ -27,7 +27,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Transaction> findAllByProductIdOrderByIdDesc(Long productId);
 
     // Find all transactions that occurred today
-    @Query("SELECT t FROM Transaction t WHERE t.transactionDate BETWEEN :startOfDay AND :endOfDay ORDER BY t.id DESC")
+    @Query("SELECT t FROM Transaction t WHERE t.createdDate BETWEEN :startOfDay AND :endOfDay ORDER BY t.id DESC")
     List<Transaction> findTodaysTransactions(
             @Param("startOfDay") LocalDateTime startOfDay,
             @Param("endOfDay") LocalDateTime endOfDay

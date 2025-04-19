@@ -42,4 +42,8 @@ public class Product extends BaseEntity { // Assuming BaseEntity has @MappedSupe
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY) // Added FetchType.LAZY
     @JsonManagedReference
     private List<Transaction> transactions;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY) // Added FetchType.LAZY
+    @JsonManagedReference
+    private List<Alert> alerts;
 }

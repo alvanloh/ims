@@ -34,25 +34,27 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public TransactionDTO createTransaction(TransactionDTO transactionDTO) {
         // Retrieve the product to update its quantity
-        Product product = productRepository.findById(transactionDTO.getProductId())
+        Product product = productRepository.findBySku(transactionDTO.getProductSku())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
-
-        // Store the current quantity before update
-        int currentQuantity = product.getQuantity();
 
         // Convert DTO to Entity
         Transaction transaction = transactionMapper.toTransactionEntity(transactionDTO);
         transaction.setProduct(product);
+
+        // Store the current quantity before update
+        int currentQuantity = product.getQuantity();
+
+        // Perform validation before updating quantity
+        if (transactionDTO.getTransactionType().equals("OUT") &&
+                currentQuantity - transactionDTO.getQuantity() < 0) {
+            throw new RuntimeException("Transaction would result in negative product quantity");
+        }
 
         // Update the product quantity based on the transaction type
         updateProductQuantity(product, transactionDTO);
 
         // Get the updated quantity after the update operation
         int updatedQuantity = product.getQuantity();
-
-        if (updatedQuantity < 0 && transactionDTO.getTransactionType().equals("OUT")) {
-            throw new RuntimeException("Transaction would result in negative product quantity");
-        }
 
         // Check if we need to create a reorder alert
         if (currentQuantity > product.getReorder() && updatedQuantity < product.getReorder()) {
@@ -107,7 +109,8 @@ public class TransactionServiceImpl implements TransactionService {
         existingTransaction.setQuantity(transactionDTO.getQuantity());
         existingTransaction.setTransactionType(Transaction.TransactionType.valueOf(transactionDTO.getTransactionType()));
         existingTransaction.setReference(transactionDTO.getReference());
-        
+        existingTransaction.setTransactionDate(transactionDTO.getTransactionDate());
+
         existingTransaction = transactionRepository.save(existingTransaction);
         return transactionMapper.toTransactionDTO(existingTransaction);
     }
